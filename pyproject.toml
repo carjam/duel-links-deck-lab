@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dl-deck-lab"
+version = "0.1.0"
+description = "Collection tracker and deck recommender for Yu-Gi-Oh Duel Links, built on YGOJSON."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = [
+    "ygojson",
+    "rapidfuzz",
+    "pytesseract",
+    "Pillow",
+]
+
+[project.optional-dependencies]
+capture = [
+    "mss",
+    "pygetwindow",
+    "keyboard",
+]
+dev = [
+    "pytest",
+]
+
+[project.scripts]
+dl-capture = "dl_deck_lab.capture.cli:main"
+dl-ocr = "dl_deck_lab.ocr.cli:main"
+dl-recommend = "dl_deck_lab.recommender.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
