@@ -67,7 +67,11 @@ def parse_screenshot(
             upscale=upscale,
         )
 
-        name_text = pytesseract.image_to_string(name_crop, config="--psm 7").strip()
+        # Default (automatic) page segmentation reads name text more reliably
+        # than forcing --psm 7 (single line) -- verified against real
+        # screenshots: the crop's small margins confuse psm 7's single-line
+        # assumption enough to measurably hurt accuracy.
+        name_text = pytesseract.image_to_string(name_crop).strip()
         if not name_text:
             # An empty slot (e.g. the last, partially-filled row of the grid).
             continue

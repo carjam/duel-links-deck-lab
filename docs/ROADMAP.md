@@ -38,6 +38,34 @@ This is a substantially bigger lift than v1 and deliberately deferred — v1
 ships something genuinely useful (archetype completion) without needing to
 solve card-effect NLP first.
 
+## Known limitation: Tesseract OCR is not reliable on Duel Links' UI at any tested screen
+
+Verified across two different in-game screens (the deck-builder's compact
+"Card Inventory" sidebar, ~92px tiles, and the full-screen "Card Catalog"
+browser, ~125px tiles): Tesseract + rapidfuzz matching against the ~14,500
+Duel Links card name pool does **not** reliably resolve either card names or
+copy-count digits, even after fixing real bugs found along the way
+(`fuzz.WRatio` is case-sensitive by default and needs
+`processor=rapidfuzz.utils.default_process`; forcing `--psm 7` on the name
+crop measurably hurt accuracy vs. default page segmentation). The core
+problem: correct OCR reads of garbled text score in the same 55-70 range as
+coincidentally-similar wrong candidates, so no confidence threshold both
+accepts true positives and rejects false positives — a wrong "confident"
+match (e.g. one real test: `Junk Converter` OCR'd text matched `7 Colored
+Fish` at a score above the default threshold) silently corrupts
+`collection.json`, which is worse than not matching at all.
+
+What *does* work: reading the same screenshots directly (by a human, or a
+vision-capable model) and fuzzy-matching those clean transcriptions against
+the real card database — typo-level noise resolves at 90%+ confidence
+reliably, the same way `tests/test_fuzzy_match.py`'s OCR-typo case does.
+`ocr.fuzzy_match.top_candidates()` exists for exactly this workflow: surface
+a short list to confirm against, rather than trust a single low-quality
+match. Until Tesseract accuracy improves (a higher-resolution capture source,
+per-character contour analysis, or a different OCR engine entirely might
+help — untested), treat `dl-ocr`'s automated matching as an assist for a
+human/vision-model-driven transcription pass, not a hands-off pipeline.
+
 ## Other known gaps (not full v2, but worth doing before then)
 
 - Duel Links banlist/restricted-count enforcement (`Legality.LIMIT1/2/3` per
