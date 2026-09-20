@@ -42,11 +42,25 @@ def load_database(
 
 
 def duel_links_cards(db: ygodb.Database) -> typing.List[ygodb.Card]:
-    """All cards actually obtainable in Duel Links.
+    """Cards YGOJSON has *confirmed* are obtainable in Duel Links.
 
-    ``Card.duel_links_rarity`` is only set for cards YGOJSON has confirmed
-    appear in Duel Links, which is a more reliable filter than legality alone
-    (a card can be modeled with Duel Links legality entries before/after it's
-    actually in the game's card pool).
+    ``Card.duel_links_rarity`` is only set once YGOJSON's data sources have
+    caught up to a given card actually being in Duel Links -- confirmed
+    against a real screenshot, this lags behind reality: cards a player
+    genuinely owns in-game can still have ``duel_links_rarity is None`` here.
+    Good enough for the recommender's archetype-completion targets, but do
+    NOT use this to filter what a card *name* is allowed to match against
+    (see ``all_named_cards`` for that) -- it would silently reject real
+    matches for cards YGOJSON just hasn't tagged yet.
     """
     return [card for card in db.cards if card.duel_links_rarity is not None and not card.illegal]
+
+
+def all_named_cards(db: ygodb.Database) -> typing.List[ygodb.Card]:
+    """Every card with an English name, regardless of Duel Links tagging.
+
+    Use this as the match pool for identifying a card from OCR'd text or any
+    other "what card is this" lookup -- restricting to ``duel_links_cards``
+    there would miss real, owned cards that YGOJSON hasn't tagged yet.
+    """
+    return [card for card in db.cards if not card.illegal and ygodb.Language.ENGLISH in card.text]

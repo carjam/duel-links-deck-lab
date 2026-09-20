@@ -5,7 +5,7 @@ import glob
 import os
 import sys
 
-from dl_deck_lab.carddb.loader import duel_links_cards, load_database
+from dl_deck_lab.carddb.loader import all_named_cards, load_database
 from dl_deck_lab.carddb.models import to_summary
 from dl_deck_lab.collection.schema import CollectionEntry, save_collection
 from dl_deck_lab.ocr.fuzzy_match import match_card_name
@@ -45,7 +45,9 @@ def main() -> None:
     args = build_parser().parse_args()
 
     db = load_database(offline=args.offline)
-    names_by_id = {s.id: s.name for s in (to_summary(c) for c in duel_links_cards(db))}
+    # Matched against every named card, not just ones YGOJSON has tagged as
+    # Duel Links-obtainable -- that tagging lags reality (see carddb.loader).
+    names_by_id = {s.id: s.name for s in (to_summary(c) for c in all_named_cards(db))}
 
     layout = load_layout_profile(args.layout)
     screenshots = sorted(glob.glob(os.path.join(args.captures_dir, "*.png")))
