@@ -10,7 +10,7 @@ from dl_deck_lab.carddb.models import to_summary
 from dl_deck_lab.collection.schema import CollectionEntry, save_collection
 from dl_deck_lab.ocr.fuzzy_match import match_card_name
 from dl_deck_lab.ocr.layout import load_layout_profile
-from dl_deck_lab.ocr.parser import parse_screenshot
+from dl_deck_lab.ocr.parser import DEFAULT_UPSCALE, parse_screenshot
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -31,6 +31,13 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Use the already-cached card database instead of checking for updates",
     )
+    parser.add_argument(
+        "--upscale",
+        type=int,
+        default=DEFAULT_UPSCALE,
+        help=f"Enlarge each name/count crop this many times before OCR (default: {DEFAULT_UPSCALE}). "
+        "Increase for small/compact card grids, decrease for an already-large capture source.",
+    )
     return parser
 
 
@@ -50,7 +57,7 @@ def main() -> None:
     unmatched = []
 
     for path in screenshots:
-        for reading in parse_screenshot(path, layout):
+        for reading in parse_screenshot(path, layout, upscale=args.upscale):
             match = match_card_name(reading.name_text, names_by_id)
             if not match.confident:
                 unmatched.append((path, reading.name_text, match.matched_name, match.score))

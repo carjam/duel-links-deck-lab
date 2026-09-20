@@ -33,9 +33,15 @@ class GridLayout:
     """One calibrated card slot, plus how many rows/columns of it tile the screen."""
 
     name_box: Box
-    """Bounding box of the card name text, within the first (top-left) slot."""
+    """Bounding box of the card name text, in absolute screenshot pixel
+    coordinates, for the first (top-left, row=0/col=0) slot only. Every other
+    slot's box is derived by shifting this one -- see `slot_boxes()`."""
     count_box: Box
-    """Bounding box of the copy-count badge text, within the first slot."""
+    """Bounding box of the copy-count badge text, in absolute screenshot
+    pixel coordinates, for the first slot only. Its box may legitimately
+    extend past `slot_width`/into the next column if that's genuinely where
+    the game renders it (e.g. an overlapping badge) -- `slot_boxes()` just
+    shifts it by a consistent offset per column either way."""
     slot_width: int
     slot_height: int
     rows: int

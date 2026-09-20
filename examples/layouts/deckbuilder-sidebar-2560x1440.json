@@ -1,0 +1,9 @@
+{
+  "_comment": "Calibrated against the Deck Edit screen's 'Card Inventory' sidebar (NOT a dedicated full-screen card list) at 2560x1440. Tied to this exact resolution and this exact panel -- re-measure if either differs. Card name is the stylized text baked into the card art itself, so accuracy will be lower than a clean UI label would give; the copy-count digit's bounding box deliberately overlaps into the next column, matching how the game actually renders it.",
+  "name_box": { "left": 1828, "top": 503, "right": 1915, "bottom": 520 },
+  "count_box": { "left": 1908, "top": 590, "right": 1924, "bottom": 618 },
+  "slot_width": 92,
+  "slot_height": 150,
+  "rows": 3,
+  "cols": 8
+}

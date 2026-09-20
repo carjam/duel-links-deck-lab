@@ -79,13 +79,33 @@ screenshots:
 }
 ```
 
-All coordinates are relative to the first slot; `slot_boxes()` (see
-`src/dl_deck_lab/ocr/layout.py`) tiles that one calibrated box across the
-full grid using `slot_width`/`slot_height`/`rows`/`cols`.
+`name_box`/`count_box` are **absolute pixel coordinates in the screenshot**,
+for the top-left slot only — not offsets relative to that slot's own corner.
+`slot_boxes()` (see `src/dl_deck_lab/ocr/layout.py`) tiles that one
+calibrated box across the full grid by adding `col * slot_width` and
+`row * slot_height` to it.
 
 5. If a page has a partially-filled last row (fewer cards than
    `rows * cols`), that's fine — empty slots OCR to blank text and are
    skipped automatically.
+
+### Worked example
+
+[`examples/layouts/deckbuilder-sidebar-2560x1440.json`](../examples/layouts/deckbuilder-sidebar-2560x1440.json)
+is a real calibrated layout, measured against the Deck Edit screen's
+compact "Card Inventory" sidebar at 2560x1440 (not a dedicated full-screen
+card list — that sidebar was the only card-grid view found so far; if a
+larger, dedicated browsing screen exists, prefer capturing that instead,
+since bigger tiles with cleaner UI text will OCR more reliably than this
+sidebar's tiny, card-art-embedded name text). It won't match your setup
+exactly, but shows the shape of a working config, including a copy-count
+box that deliberately overlaps into the next column because that's
+genuinely where the game renders it.
+
+If your card names are small and/or embedded in the card art rather than
+a clean text label (as in that example), also see `--upscale` on `dl-ocr`
+below — the default already enlarges each crop 4x before OCR, but you may
+need more for a very compact grid.
 
 ## 3. Run OCR
 
@@ -94,6 +114,9 @@ From WSL, Linux, or Windows — doesn't matter:
 ```bash
 dl-ocr --captures-dir captures --layout my-layout.json --out collection.json
 ```
+
+Add `--upscale N` (default 4) to enlarge each crop further before OCR if
+your card grid is small/compact.
 
 Check the "low-confidence reads" printed to stderr — those are card names
 Tesseract couldn't confidently match to a known Duel Links card, and were
