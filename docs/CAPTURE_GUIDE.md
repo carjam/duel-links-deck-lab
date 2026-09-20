@@ -29,11 +29,27 @@ page of cards you want captured, make sure it's fully loaded/settled, then
 press `F9`. Press `F10` when you've gone through your whole collection.
 Screenshots land in `.\captures\`.
 
-If the tool can't find the game window, pass a more specific title match:
+### If the tool can't find the game window
+
+The default `--window-title "Duel Links"` is a guess, not a confirmed title
+from Konami. If you get `LookupError: No window found with title
+containing 'Duel Links'`, list every open window's actual title:
+
+```powershell
+dl-capture --list-windows
+```
+
+Find the one that's the game (it may be titled just `"Yu-Gi-Oh!"`, or
+something else entirely) and pass it explicitly:
 
 ```powershell
 dl-capture --window-title "Yu-Gi-Oh"
 ```
+
+If Duel Links doesn't show up in that list at all, it's likely running in a
+fullscreen/exclusive display mode, which some window-enumeration APIs can't
+see. Switch it to windowed or borderless-windowed mode in the game's display
+settings and try again.
 
 ## 2. Calibrate a layout profile (one-time, per screen resolution/UI scale)
 

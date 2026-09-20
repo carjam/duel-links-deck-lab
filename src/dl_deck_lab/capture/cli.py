@@ -27,6 +27,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--out-dir", default="captures", help="Where to save screenshots (default: ./captures)"
     )
+    parser.add_argument(
+        "--list-windows",
+        action="store_true",
+        help="Print every open window's title (to find the right --window-title value) and exit",
+    )
     return parser
 
 
@@ -43,9 +48,15 @@ def main() -> None:
     # import just because these Windows-only packages aren't installed.
     from dl_deck_lab.capture.hotkey_listener import wait_for_session
     from dl_deck_lab.capture.screenshot import capture_region
-    from dl_deck_lab.capture.window import find_window
+    from dl_deck_lab.capture.window import find_window, list_window_titles
 
     args = build_parser().parse_args()
+
+    if args.list_windows:
+        for title in list_window_titles():
+            print(title)
+        return
+
     os.makedirs(args.out_dir, exist_ok=True)
 
     region = find_window(args.window_title)
