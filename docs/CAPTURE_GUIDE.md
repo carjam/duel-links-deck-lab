@@ -19,8 +19,9 @@ focus — run your terminal elevated, or the capture hotkey silently won't
 fire.
 
 Don't want a Python install at all? See [`packaging/README.md`](../packaging/README.md)
-for building a standalone `dl-capture.exe` — untested end-to-end (written
-without a Windows machine to build it on), so treat it as a starting point.
+for building a standalone `dl-capture.exe` — window detection is confirmed
+working from a real build, but a full capture session (the hotkey +
+screenshot saving) hasn't been separately verified from the packaged binary.
 
 ## 1. Run the capture session
 

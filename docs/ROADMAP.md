@@ -82,7 +82,9 @@ human/vision-model-driven transcription pass, not a hands-off pipeline.
   Konami changes the list; there's no automated source for it.
 - Skill card inventory (currently out of scope entirely — no capture/OCR
   support for the Skill selection screen).
-- `dl_capture.spec`'s PyInstaller packaging (see `packaging/`) was written
-  without a Windows machine to build or run it on — the hidden-imports list
-  is a best-effort guess, not a verified build. Needs someone on Windows to
-  actually run it once and fix whatever it missed.
+- `dl_capture.spec`'s PyInstaller packaging (see `packaging/`) is **partially
+  verified**: built and run on a real Windows machine, `--list-windows`
+  printed real window titles correctly, confirming pygetwindow's hidden
+  imports are sufficient. A full capture session (hotkey + screenshot,
+  exercising `mss`/`keyboard`) hasn't been separately confirmed from the
+  packaged binary yet.

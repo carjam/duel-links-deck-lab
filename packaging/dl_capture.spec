@@ -3,14 +3,15 @@
 # Run from anywhere on a native Windows Python (not WSL):
 #   pyinstaller packaging/dl_capture.spec
 #
-# UNTESTED: written without a Windows machine to build/run it on. The
-# hidden-imports list below is a defensive best guess at what pygetwindow,
-# mss, and keyboard's Windows backends need (they load some submodules
-# dynamically, which PyInstaller's static analysis can miss). If the built
-# .exe crashes immediately on launch, run it from a terminal (not by
-# double-clicking) to see the traceback -- it's almost always a missing
-# hidden import, which PyInstaller's error message names directly; add it
-# to the list below and rebuild.
+# Verified: built and run on a real Windows machine, `dl-capture.exe
+# --list-windows` printed real window titles correctly -- pygetwindow's
+# hidden imports below are confirmed sufficient. mss/keyboard (the actual
+# screenshot + hotkey capture, as opposed to just window enumeration)
+# haven't been separately confirmed from the packaged binary yet; if a
+# real capture session crashes where plain `dl-capture` doesn't, that's
+# almost always a missing hidden import for one of those two -- the
+# traceback (run from a terminal, not by double-clicking) will name it
+# directly; add it to the list below and rebuild.
 
 import os
 

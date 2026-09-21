@@ -16,23 +16,25 @@ Produces `dist\dl-capture.exe`. Run it from a terminal, not by
 double-clicking -- console output (including the "watching for F9/F10"
 message and any crash traceback) only shows up that way.
 
-## This was written without a Windows machine to test the build on
+## Verification status
 
-`dl_capture.spec`'s `hiddenimports` list is a best-effort guess at what
-`pygetwindow`, `mss`, and `keyboard`'s Windows backends need -- these
-packages load some platform-specific submodules dynamically, which
-PyInstaller's static import analysis can miss. If the built `.exe` crashes
-immediately:
+Built and run on a real Windows machine: `dl-capture.exe --list-windows`
+printed real window titles correctly, confirming `pygetwindow`'s hidden
+imports are sufficient and the build itself works. A full capture session
+(F9/F10 hotkey + screenshot saving, which also exercise `mss` and `keyboard`)
+hasn't been separately confirmed from the packaged binary yet.
+
+If the built `.exe` crashes:
 
 1. Run it from a terminal to see the traceback (a double-clicked console app
    closes its window before you can read a crash message).
 2. The traceback will usually be a `ModuleNotFoundError` naming the exact
    missing submodule -- add that name to `hidden_imports` in
    `dl_capture.spec` and rebuild.
-3. If it builds and runs but `--list-windows`/capture doesn't work the same
-   as running `dl-capture` via plain Python, that's a real bug in this
-   packaging (not in `dl-capture` itself, which is separately verified) --
-   worth filing as an issue with the exact error.
+3. If it builds and runs but behaves differently than running `dl-capture`
+   via plain Python, that's a real bug in this packaging (not in
+   `dl-capture` itself, which is separately verified) -- worth filing as an
+   issue with the exact error.
 
 ## Distributing it
 
