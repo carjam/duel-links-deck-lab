@@ -34,6 +34,7 @@ dl-recommend = "dl_deck_lab.recommender.cli:main"
 dl-deck-check = "dl_deck_lab.decks.cli:main"
 dl-deck-import = "dl_deck_lab.decks.cli_import:main"
 dl-deck-view = "dl_deck_lab.decks.cli_view:main"
+dl-synergy = "dl_deck_lab.synergy.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

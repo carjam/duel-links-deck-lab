@@ -15,6 +15,7 @@ against ``Database.series`` directly instead.
 from __future__ import annotations
 
 import dataclasses
+import typing
 
 import ygojson.database as ygodb
 
@@ -24,11 +25,16 @@ class CardSummary:
     id: str
     name: str
     duel_links_legal: bool
+    effect_text: typing.Optional[str] = None
+    """Raw English effect/lore text, if any -- used by ``synergy`` to tag
+    what a card's effect mechanically does. Optional and defaulted so
+    existing callers that don't need it are unaffected."""
 
 
 def to_summary(card: ygodb.Card) -> CardSummary:
     text = card.text.get(ygodb.Language.ENGLISH)
     name = text.name if text is not None else str(card.id)
+    effect_text = text.effect if text is not None else None
 
     duel_links_legality = card.legality.get(ygodb.Format.DUELLINKS)
     duel_links_legal = (
@@ -40,4 +46,5 @@ def to_summary(card: ygodb.Card) -> CardSummary:
         id=str(card.id),
         name=name,
         duel_links_legal=duel_links_legal,
+        effect_text=effect_text,
     )

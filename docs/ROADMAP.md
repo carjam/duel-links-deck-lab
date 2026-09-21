@@ -12,7 +12,7 @@
 - `dl-deck-view`: renders a saved deck as a self-contained HTML page
   (grouped/ordered like the in-game deck-edit screen) and opens it locally.
 
-## v2: combo/synergy graph search
+## v2: combo/synergy graph search (GY-engine slice built; rest still open)
 
 The v1 recommender only reasons about *named archetypes/series* as YGOJSON
 already groups them. It has no idea that, say, a generic "special summon from
@@ -20,28 +20,55 @@ GY" monster combos with an unrelated archetype's GY-filling engine — that
 kind of cross-archetype synergy isn't represented anywhere in YGOJSON's
 schema, so it has to be derived from card effect text.
 
-The intended v2 approach:
+**Built** (`src/dl_deck_lab/synergy/`, `dl-synergy`): the GY-engine slice —
+a card that mills/discards feeding a card whose effect needs something in
+the GY. Three real design problems surfaced and were fixed by actually
+running it against the real 1,399-card collection, not just unit tests:
 
-1. **Tag extraction**: parse each Duel Links-legal card's effect text
-   (`CardText.effect` in YGOJSON) into a small set of mechanical tags —
-   things like `searches`, `special-summons-from-gy`, `mills`,
-   `banishes-for-cost`, `negates-activation`, etc. This is the hard part:
-   either a hand-curated tag ruleset matched against effect text patterns, or
-   an LLM-assisted first pass that a human reviews before trusting it.
-2. **Synergy graph**: build a graph where cards are nodes and edges represent
-   "card A's output tag feeds card B's input tag" (e.g. A mills, B has a
-   GY-cost effect).
-3. **Combo search over owned cards**: given your `collection.json`, search
-   this graph restricted to cards you own, surfacing connected clusters —
-   these are your candidate "engines", independent of whether they fall under
-   a single named archetype.
-4. **Ranking**: some notion of combo strength/consistency (e.g. how many
-   copies you own of each piece, how many alternate paths into the same
-   effect) rather than just raw connectivity.
+1. **Connected-components clustering doesn't work.** Mill/discard is a
+   broadly-shared resource (mechanically true -- any mill helps any
+   GY-reliant payoff), so a large enough collection transitively merges
+   almost every miller and payoff into one meaningless mega-cluster (463 of
+   1,399 cards, in practice). Fixed by ranking *payoff* cards by enabler
+   count instead of clustering.
+2. **Untyped tags don't differentiate payoffs.** Every payoff showed the
+   identical enabler count, because "any monster in GY" was treated as one
+   interchangeable bucket. Fixed by giving GY-related tags an optional
+   *restriction* (a Type like "dragon", a Level cap like "level_le_4", or a
+   named archetype like "red-eyes"), extracted from the same effect text,
+   and only counting an enabler as a genuine match when its own restriction
+   is compatible with the payoff's.
+3. **Restriction-awareness alone still wasn't enough** — restricted payoffs
+   still showed ~140/160, because an *unrestricted* enabler legitimately
+   satisfies a restricted payoff too (a generic mill really can send a
+   Dragon), so generic support drowned out the interesting signal. Fixed by
+   reporting exact-restriction matches (`specific_enabler_ids`) separately
+   from generic catch-all support (`generic_enabler_ids`), and ranking on
+   the specific count first. Verified against real output:
+   "Darkflare Dragon → Cyberdark Dragon" (a real, non-obvious Dragon-specific
+   combo, confirmed against both cards' actual effect text) now correctly
+   outranks generic noise.
 
-This is a substantially bigger lift than v1 and deliberately deferred — v1
-ships something genuinely useful (archetype completion) without needing to
-solve card-effect NLP first.
+Also found and fixed two regex false-positives along the way, both from the
+same root cause (a sentence packing an unrelated condition and effect
+together): a bare `deck` match didn't distinguish "Extra Deck" from the Main
+Deck (false-positived Mask Change as a mill), and a GY mention in a trigger
+*condition* leaked into an unrelated effect clause (false-positived Masked
+HERO Dian as summoning from GY when it summons from the Deck) — fixed by
+only matching within the text after a sentence's last `:`, since official
+templating is overwhelmingly "[condition]: [effect]".
+
+**Not built yet** — the rest of the original v2 sketch:
+
+1. More mechanical tags beyond the GY-engine pattern (equip synergies
+   without a GY source, negation chains, protection/immunity stacking,
+   etc.) — same tagging approach, just more patterns.
+2. Combo **strength** ranking beyond "how many distinct enablers" — e.g.
+   weighting by copies owned, or by how many alternate paths into the same
+   effect exist.
+3. This only reasons about DL-legal cards' effect text as YGOJSON has it;
+   still approximate by design (regex, not real parsing) — same honesty as
+   the OCR module, prefer under-tagging over inventing a false combo.
 
 ## Known limitation: Tesseract OCR is not reliable on Duel Links' UI at any tested screen
 
