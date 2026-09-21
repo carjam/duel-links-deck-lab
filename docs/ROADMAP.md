@@ -9,6 +9,8 @@
 - Named decklists (`decks.json`) with structural legality checking
   (`dl-deck-check`) and a plain-text importer (`dl-deck-import`) — see
   `src/dl_deck_lab/decks/`.
+- `dl-deck-view`: renders a saved deck as a self-contained HTML page
+  (grouped/ordered like the in-game deck-edit screen) and opens it locally.
 
 ## v2: combo/synergy graph search
 

@@ -18,6 +18,9 @@ your collection. This project does both:
 4. **Build** — save a specific deck build as `decks.json` and check it's
    actually legal to play: Main/Extra Deck size, the 3-copies-per-card cap,
    and whether you own enough copies of everything in it.
+5. **View** — render a saved deck as a self-contained HTML page, grouped and
+   ordered like Duel Links' own deck-edit screen, and open it in your
+   browser.
 
 See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for why capture is
 Windows-only while everything else runs anywhere, and
@@ -98,6 +101,21 @@ everything used. If you maintain a `banlist.json` (see
 [`src/dl_deck_lab/decks/banlist.py`](src/dl_deck_lab/decks/banlist.py) —
 YGOJSON doesn't track Duel Links' live banlist, so this has to be
 hand-maintained), it's also checked against that.
+
+### 5. View a deck
+
+```bash
+dl-deck-view
+```
+
+Renders the deck as a single HTML file, grouped and ordered the way
+Duel Links' own deck-edit screen shows it (Main Deck as Monsters, then
+Spells, then Traps; Extra Deck below), each unique card shown once with a
+copy-count badge, and opens it in your default browser. Card art is
+downloaded once and cached (`~/.cache/dl-deck-lab/card-images/`), then
+embedded directly into the HTML — the file is self-contained, safe to move
+or share. Pass `--name` if `decks.json` has more than one deck, or
+`--no-open` to just write the file.
 
 ## Known limitations (v1)
 

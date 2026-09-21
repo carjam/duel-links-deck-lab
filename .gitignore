@@ -12,4 +12,6 @@ dist/
 /captures/
 /collection.json
 /decks.json
+/banlist.json
+/*.html
 .cache/
