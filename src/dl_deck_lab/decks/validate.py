@@ -1,10 +1,11 @@
-"""Structural deck-legality checks: sizes and copy limits.
+"""Structural deck-legality checks: sizes, copy limits, and (optionally) the banlist.
 
-This deliberately does NOT check the live Duel Links banlist (a card limited
-to 1 or 2, or forbidden entirely, would still pass here) -- that's a known
-gap, see docs/ROADMAP.md. It catches the mechanical rules that never change:
-deck size, the standard 3-copies-per-name cap, and whether you actually own
-enough copies of each card.
+Deck size and the standard 3-copies-per-name cap never change and are always
+enforced. The *live* Duel Links banlist is a different matter -- YGOJSON
+doesn't track it (see ``banlist.py``'s docstring), so checking it here is
+opt-in: pass ``banlist_limits`` (from ``banlist.load_banlist_limits``) if you
+maintain that file, and a card limited below 3 gets checked against its real
+limit instead of the generic cap.
 """
 
 from __future__ import annotations
@@ -27,13 +28,17 @@ class Violation:
 
 
 def validate_deck(
-    deck: Deck, owned_copies_by_id: typing.Optional[typing.Dict[str, int]] = None
+    deck: Deck,
+    owned_copies_by_id: typing.Optional[typing.Dict[str, int]] = None,
+    banlist_limits: typing.Optional[typing.Dict[str, int]] = None,
 ) -> typing.List[Violation]:
     """Returns every structural problem found; an empty list means the deck
-    is legal to build in Duel Links (modulo the live banlist -- see module
-    docstring). Pass ``owned_copies_by_id`` (card_id -> copies_owned, e.g.
-    from collection.schema.load_collection) to also check you own enough
-    copies of everything in the list.
+    is legal to build. Pass ``owned_copies_by_id`` (card_id -> copies_owned,
+    e.g. from collection.schema.load_collection) to also check you own
+    enough copies of everything in the list. Pass ``banlist_limits``
+    (card_id -> max copies, from ``banlist.load_banlist_limits``) to also
+    check against a hand-maintained banlist -- without it, every card is
+    only checked against the generic 3-copy cap.
     """
     violations = []
 
@@ -53,9 +58,13 @@ def validate_deck(
 
     for card_id, total in per_card_total.items():
         name = next(c.name for c in deck.cards if c.card_id == card_id)
-        if total > MAX_COPIES_PER_CARD:
+
+        banlist_limit = (banlist_limits or {}).get(card_id)
+        effective_max = MAX_COPIES_PER_CARD if banlist_limit is None else banlist_limit
+        if total > effective_max:
+            reason = "banlist" if banlist_limit is not None else "the standard cap"
             violations.append(
-                Violation(f"{name}: {total} copies used, max is {MAX_COPIES_PER_CARD}")
+                Violation(f"{name}: {total} copies used, max is {effective_max} ({reason})")
             )
 
         if owned_copies_by_id is not None:

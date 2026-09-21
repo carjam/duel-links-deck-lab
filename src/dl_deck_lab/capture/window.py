@@ -10,6 +10,8 @@ import dataclasses
 
 import pygetwindow
 
+from dl_deck_lab.capture.matching import is_blank_title, title_matches
+
 
 @dataclasses.dataclass(frozen=True)
 class WindowRegion:
@@ -26,7 +28,7 @@ def list_window_titles() -> list[str]:
     usually many of those (background/helper processes) and they're never
     what you want here.
     """
-    return [w.title for w in pygetwindow.getAllWindows() if w.title.strip()]
+    return [w.title for w in pygetwindow.getAllWindows() if not is_blank_title(w.title)]
 
 
 def find_window(title_substring: str = "Duel Links") -> WindowRegion:
@@ -37,9 +39,7 @@ def find_window(title_substring: str = "Duel Links") -> WindowRegion:
     or is in a fullscreen mode pygetwindow can't see. Run
     ``dl-capture --list-windows`` to see every open window's actual title.
     """
-    matches = [
-        w for w in pygetwindow.getAllWindows() if title_substring.lower() in w.title.lower()
-    ]
+    matches = [w for w in pygetwindow.getAllWindows() if title_matches(w.title, title_substring)]
     if not matches:
         raise LookupError(
             f"No window found with title containing {title_substring!r}. "

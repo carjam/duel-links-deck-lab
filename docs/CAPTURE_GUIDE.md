@@ -18,6 +18,10 @@ Administrator** on Windows to catch keypresses while the game window has
 focus — run your terminal elevated, or the capture hotkey silently won't
 fire.
 
+Don't want a Python install at all? See [`packaging/README.md`](../packaging/README.md)
+for building a standalone `dl-capture.exe` — untested end-to-end (written
+without a Windows machine to build it on), so treat it as a starting point.
+
 ## 1. Run the capture session
 
 ```powershell

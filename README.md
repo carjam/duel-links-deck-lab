@@ -72,8 +72,17 @@ dl-recommend --top 10
 
 `decks.json` holds named decklists (a specific build), separate from
 `collection.json` (what you own overall) since a re-sync shouldn't erase your
-saved builds. See [`src/dl_deck_lab/decks/schema.py`](src/dl_deck_lab/decks/schema.py)
-for the format — there's no CLI to *create* one yet, just to check one:
+saved builds. Write a plain-text decklist (see
+[`examples/decklists/brave-neos-hero.decklist`](examples/decklists/brave-neos-hero.decklist))
+and import it:
+
+```bash
+dl-deck-import --input my-deck.decklist --name "My Deck"
+```
+
+This resolves each line's card name against the real card database (fuzzy
+matching handles small typos, same as `dl-ocr`), saves it into `decks.json`,
+and validates it immediately. To re-check a saved deck later:
 
 ```bash
 dl-deck-check
@@ -85,16 +94,18 @@ Brave Neos HERO: OK  (Main 30, Extra 8)
 
 Checks Main/Extra Deck size, the 3-copies-per-card cap, and (unless
 `--skip-ownership`) that `collection.json` actually shows enough copies of
-everything used.
+everything used. If you maintain a `banlist.json` (see
+[`src/dl_deck_lab/decks/banlist.py`](src/dl_deck_lab/decks/banlist.py) —
+YGOJSON doesn't track Duel Links' live banlist, so this has to be
+hand-maintained), it's also checked against that.
 
 ## Known limitations (v1)
 
-- No modeling of Duel Links' *live* banlist/restricted-card counts (`dl-deck-check`
-  enforces the standard 3-copy cap and deck sizes, not e.g. a card currently
-  Limited to 1) — always double check a build against the in-game banlist.
+- No *live* Duel Links banlist data — YGOJSON doesn't track it. `dl-deck-check`
+  enforces the standard 3-copy cap and deck sizes always, and a hand-maintained
+  `banlist.json` on top if you keep one current; without it, a card currently
+  Limited to 1 in-game would still pass.
 - No Skill card inventory tracking.
-- No CLI to build a `decks.json` from scratch — hand-author the JSON, or ask
-  an assistant to translate a `dl-recommend` result into one.
 - Recommends by archetype completion only, not by actual combo/synergy
   potential across your whole collection (see `docs/ROADMAP.md`).
 

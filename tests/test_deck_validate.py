@@ -50,3 +50,40 @@ def test_flags_using_more_copies_than_owned():
     )
     violations = validate_deck(deck, owned_copies_by_id={"rare-1": 1})
     assert any("deck uses 2, but collection.json shows only 1 owned" in v.message for v in violations)
+
+
+def test_banlist_limit_below_three_is_enforced():
+    deck = Deck(
+        name="Test",
+        cards=[make_card(f"Monster {i}", "main", 3) for i in range(6)]
+        + [make_card("Restricted Card", "main", 2, card_id="restricted-1")],
+    )
+    violations = validate_deck(deck, banlist_limits={"restricted-1": 1})
+    assert any(
+        "Restricted Card: 2 copies used, max is 1 (banlist)" in v.message for v in violations
+    )
+
+
+def test_banlist_limit_of_three_is_not_flagged():
+    deck = Deck(
+        name="Test",
+        cards=[make_card(f"Monster {i}", "main", 3) for i in range(7)]
+        + [make_card("Fine Card", "main", 3, card_id="fine-1")],
+    )
+    violations = validate_deck(deck, banlist_limits={"fine-1": 3})
+    assert violations == []
+
+
+def test_unlisted_card_still_gets_the_standard_cap():
+    deck = Deck(
+        name="Test",
+        cards=[make_card(f"Monster {i}", "main", 3) for i in range(6)]
+        + [make_card("Unlisted Card", "main", 4, card_id="unlisted-1")],
+    )
+    # banlist_limits is provided but says nothing about "unlisted-1" -- the
+    # generic 3-copy cap must still apply, not an unbounded pass-through.
+    violations = validate_deck(deck, banlist_limits={"some-other-card": 1})
+    assert any(
+        "Unlisted Card: 4 copies used, max is 3 (the standard cap)" in v.message
+        for v in violations
+    )

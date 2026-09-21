@@ -6,6 +6,9 @@
 - OCR + fuzzy name matching into `collection.json`.
 - Archetype-completion recommender: rank archetypes/series by % owned, list
   what's missing.
+- Named decklists (`decks.json`) with structural legality checking
+  (`dl-deck-check`) and a plain-text importer (`dl-deck-import`) — see
+  `src/dl_deck_lab/decks/`.
 
 ## v2: combo/synergy graph search
 
@@ -68,10 +71,16 @@ human/vision-model-driven transcription pass, not a hands-off pipeline.
 
 ## Other known gaps (not full v2, but worth doing before then)
 
-- Duel Links banlist/restricted-count enforcement (`Legality.LIMIT1/2/3` per
-  YGOJSON's `Format.DUELLINKS` legality data is available — just not consumed
-  by the recommender yet).
+- **Live Duel Links banlist**: verified this session that YGOJSON does NOT
+  actually track it (`Format.DUELLINKS` legality is populated on essentially
+  none of its 14,616 cards, despite the schema having the field) — the
+  original plan to consume `Legality.LIMIT1/2/3` from there doesn't work.
+  `dl-deck-check`/`dl-deck-import` instead accept an optional hand-maintained
+  `banlist.json` (see `decks/banlist.py`) that you update yourself when
+  Konami changes the list; there's no automated source for it.
 - Skill card inventory (currently out of scope entirely — no capture/OCR
   support for the Skill selection screen).
-- Packaging `dl-capture` as a standalone Windows `.exe` so non-Python users
-  can use it.
+- `dl_capture.spec`'s PyInstaller packaging (see `packaging/`) was written
+  without a Windows machine to build or run it on — the hidden-imports list
+  is a best-effort guess, not a verified build. Needs someone on Windows to
+  actually run it once and fix whatever it missed.

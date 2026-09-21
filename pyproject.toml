@@ -31,6 +31,7 @@ dl-capture = "dl_deck_lab.capture.cli:main"
 dl-ocr = "dl_deck_lab.ocr.cli:main"
 dl-recommend = "dl_deck_lab.recommender.cli:main"
 dl-deck-check = "dl_deck_lab.decks.cli:main"
+dl-deck-import = "dl_deck_lab.decks.cli_import:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
