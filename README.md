@@ -15,6 +15,9 @@ your collection. This project does both:
    copy counts, matched against YGOJSON's card database.
 3. **Recommend** — rank every Duel Links archetype/series by how much of it
    you already own, and list exactly what's missing.
+4. **Build** — save a specific deck build as `decks.json` and check it's
+   actually legal to play: Main/Extra Deck size, the 3-copies-per-card cap,
+   and whether you own enough copies of everything in it.
 
 See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for why capture is
 Windows-only while everything else runs anywhere, and
@@ -65,12 +68,33 @@ dl-recommend --top 10
     missing: ...
 ```
 
+### 4. Save and validate a deck
+
+`decks.json` holds named decklists (a specific build), separate from
+`collection.json` (what you own overall) since a re-sync shouldn't erase your
+saved builds. See [`src/dl_deck_lab/decks/schema.py`](src/dl_deck_lab/decks/schema.py)
+for the format — there's no CLI to *create* one yet, just to check one:
+
+```bash
+dl-deck-check
+```
+
+```
+Brave Neos HERO: OK  (Main 30, Extra 8)
+```
+
+Checks Main/Extra Deck size, the 3-copies-per-card cap, and (unless
+`--skip-ownership`) that `collection.json` actually shows enough copies of
+everything used.
+
 ## Known limitations (v1)
 
-- No modeling of Duel Links' live banlist/restricted-card counts beyond "is
-  this card obtainable at all" — always double check a recommended deck
-  against the in-game banlist before building it.
+- No modeling of Duel Links' *live* banlist/restricted-card counts (`dl-deck-check`
+  enforces the standard 3-copy cap and deck sizes, not e.g. a card currently
+  Limited to 1) — always double check a build against the in-game banlist.
 - No Skill card inventory tracking.
+- No CLI to build a `decks.json` from scratch — hand-author the JSON, or ask
+  an assistant to translate a `dl-recommend` result into one.
 - Recommends by archetype completion only, not by actual combo/synergy
   potential across your whole collection (see `docs/ROADMAP.md`).
 

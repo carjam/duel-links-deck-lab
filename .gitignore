@@ -11,4 +11,5 @@ dist/
 # runtime data, not source
 /captures/
 /collection.json
+/decks.json
 .cache/
